@@ -12,13 +12,11 @@ from .modeladmin_mixins import ModelAdminMixin
 
 @admin.register(CancerDxAndTxEndpoint, site=potlako_subject_admin)
 class CancerDxAndTxAssessmentEndpointAdmin(ModelAdminMixin, admin.ModelAdmin):
-
     form = CancerDxAndTxAssessmentEndpointForm
     extra_context_models = ['cliniciancallenrollment',
                             'baselineclinicalsummary',
                             'patientcallinitial',
-                            'symptomandcareseekingassessment',
-                            'cancerdxandtx']
+                            'navigationsummaryandplan']
 
     fieldsets = (
         ('Diagnosis Details', {
@@ -53,7 +51,8 @@ class CancerDxAndTxAssessmentEndpointAdmin(ModelAdminMixin, admin.ModelAdmin):
                        'radiation',
                        'radiation_date',
                        'radiation_date_estimated',
-                       'radiation_date_estimation'),
+                       'radiation_date_estimation',
+                       'final_deposition'),
         }), audit_fieldset_tuple)
 
     radio_fields = {
@@ -61,7 +60,6 @@ class CancerDxAndTxAssessmentEndpointAdmin(ModelAdminMixin, admin.ModelAdmin):
         'diagnosis_date_estimated': admin.VERTICAL,
         'diagnosis_date_estimation': admin.VERTICAL,
         'clinical_impression': admin.VERTICAL,
-        'diagnosis_date_estimated': admin.VERTICAL,
         'final_cancer_diagnosis': admin.VERTICAL,
         'non_cancer_diagnosis': admin.VERTICAL,
         'cancer_diagnosis_stage': admin.VERTICAL,
@@ -79,19 +77,21 @@ class CancerDxAndTxAssessmentEndpointAdmin(ModelAdminMixin, admin.ModelAdmin):
         'radiation': admin.VERTICAL,
         'radiation_date_estimated': admin.VERTICAL,
         'radiation_date_estimation': admin.VERTICAL,
+        'final_deposition': admin.VERTICAL,
     }
-    
+
     list_display = ('subject_identifier',
                     'cancer_evaluation',
                     'clinical_impression',
                     'final_cancer_diagnosis',
                     'non_cancer_diagnosis')
-    
+
     def redirect_url(self, request, obj, post_url_continue=None):
         redirect_url = super().redirect_url(
             request, obj, post_url_continue=post_url_continue)
         if request.GET.dict().get('next'):
-            url_name = settings.DASHBOARD_URL_NAMES.get('endpoint_listboard_url')
+            url_name = settings.DASHBOARD_URL_NAMES.get(
+                'endpoint_listboard_url')
             attrs = request.GET.dict().get('next').split(',')[1:]
             options = {k: request.GET.dict().get(k)
                        for k in attrs if request.GET.dict().get(k)}
@@ -101,4 +101,3 @@ class CancerDxAndTxAssessmentEndpointAdmin(ModelAdminMixin, admin.ModelAdmin):
                 raise ModelAdminNextUrlRedirectError(
                     f'{e}. Got url_name={url_name}, kwargs={options}.')
         return redirect_url
-
